@@ -1,0 +1,13 @@
+{
+    "name":"QuickFix",
+    "version": "1.0.0",
+    "description": "Code Formatter & Explainer CLI",
+    "bin": {
+        "qfix": "./bin/qfix"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC"
+}
