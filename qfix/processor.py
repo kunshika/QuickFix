@@ -1,20 +1,23 @@
 import os
-import google.generativeai as genai
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.syntax import Syntax
+from langchain_groq import ChatGroq
 
 console = Console()
 
 class CodeProcessor:
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.api_key = api_key or os.getenv("GROQ_API_KEY")
         if self.api_key:
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-2.0-flash')
+            # Initialize ChatGroq with a specific model
+            self.model = ChatGroq(
+                api_key=self.api_key,
+                model="groq/compound"  # Fast and capable model
+            )
         else:
             self.model = None
-            console.print("[yellow]Warning: No API key found. Running in mock mode.[/yellow]")
+            console.print("[yellow]Warning: No GROQ_API_KEY found. Running in mock mode.[/yellow]")
 
     def process_code(self, code_snippet: str, language: str = "python"):
         if not self.model:
@@ -43,10 +46,10 @@ class CodeProcessor:
         """
 
         try:
-            response = self.model.generate_content(prompt)
-            return self._parse_response(response.text)
+            response = self.model.invoke(prompt)
+            return self._parse_response(response.content)
         except Exception as e:
-            console.print(f"[red]Error calling AI API: {e}[/red]")
+            console.print(f"[red]Error calling Groq API: {e}[/red]")
             return self._mock_process(code_snippet, language)
 
     def _parse_response(self, text: str):
@@ -72,5 +75,5 @@ class CodeProcessor:
     def _mock_process(self, code_snippet: str, language: str):
         return {
             "code": code_snippet,  # Just return original in mock
-            "explanation": "## Mock Explanation\n\nNo API key provided. This is a mock response.\n\n- The code was not actually processed by AI.\n- Please set `GEMINI_API_KEY` to get real results."
+            "explanation": "## Mock Explanation\n\nNo API key provided. This is a mock response.\n\n- The code was not actually processed by AI.\n- Please set `GROQ_API_KEY` in your .env file to get real results."
         }
